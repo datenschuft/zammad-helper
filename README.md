@@ -1,9 +1,5 @@
-Zammad Information - Exporter
 
-Talking to Zammad via REST-API, fetching ticket-informations and export them
-
-
-# Zammad Helper CURLOPT_HTTPHEADER
+# Zammad Helper (PHP)
 
 (c)2018 Wenger Florian<br>
 wenger@unifox.at<br>
