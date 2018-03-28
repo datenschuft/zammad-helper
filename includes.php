@@ -73,17 +73,17 @@ class Zammad
 			if (count($json_array)==1) {
 				$this->logger(3,"User ".$user["email"]." found");
 			} elseif (count($json_array)==0) {
-				$this->logger(3,"User ".$user["email"]." nicht gefunden - lege an");
+				$this->logger(3,"User ".$user["email"]." not found - creating user");
 				$data=json_encode($user);
         //print_r($data);
         $url=$this->config['url']."/users";
         //echo "\n$url";
 				$json_return=$this->CallRESTAPi('POST', $url, $data, $this->config['auth']);
-        echo "---------> anlegen json return \n";
-        print_r($json_return);
+        //echo "---------> anlegen json return \n";
+        //print_r($json_return);
 				$json_array=json_decode($json_return,TRUE);
-        echo "anlegen json array \n";
-				print_r($json_array);//header auswerten "Status: 201 Created"
+        //echo "anlegen json array \n";
+				//print_r($json_array);//header auswerten "Status: 201 Created"
 			} else {
 				$this->logger(1,"ERROR suche nach ".$user["email"]. "ergab ".count($json_array)." treffer. das darf nicht vorkommen");
 			}
@@ -138,7 +138,7 @@ class Zammad
         echo "\n--------body\n";
         print_r($body);*/
 				if (curl_error($curl)) {
-						$this->logger('error:' . curl_error($curl));
+						$this->logger(1, "Error ".curl_error($curl));
             print_r($response);
             echo "\n--------header\n";
             print_r($header);
