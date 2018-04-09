@@ -1,12 +1,32 @@
 <?php
 
+//config
+$c=array();
+// Zammad - System
+$c['zurl']="https://zammad.example.com/api/v1";
+$c['zuser']="zammad-admin@yourdomain";
+$c['zpasswd']="securepassword";
+//loglevel
+$c['loglevel']=10;
+//caching
+// none only local variable caching
+// or sql
+$c['cache']['mysql']['server']="127.0.0.1";
+$c['cache']['mysql']['user']="cacheuser";
+$c['cache']['mysql']['passwd']="cachepwd";
+$c['cache']['mysql']['db']="zammad_helper";
 
 include('includes.php');
 
-// $c is a configuration array
+
 $zammad= new Zammad();
 $zammad->load_config($c);
 $auth=array($c['zuser'],$c['zpasswd']);
+
+//--------------------------
+// Clear Zammad-Helper caching - System
+$zammad->clearcache();
+
 
 
 //--------------------------
@@ -27,3 +47,5 @@ while ($row=mysqli_fetch_assoc($mysqlres)) {
 }
 
 //--------------------------
+// fetching Groupname id:12
+echo $zammad->get_groupname(12);

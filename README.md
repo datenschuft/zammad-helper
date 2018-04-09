@@ -11,6 +11,8 @@ License: GNU GPL 3
 php class to interact with zammad rest api
 
 * add customer if customer with email not found in zammad userlist
+* fetching ticket infos
+* fetching (and cache) group name
 
 ## Requirements
 php curl
