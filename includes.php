@@ -15,6 +15,7 @@ class Zammad
 {
     private $config;
     private $groups;
+    private $users;
     private $loglevel;
     private $cacheengine;
     private $mysqli;
@@ -65,11 +66,16 @@ class Zammad
    *--------------------------*/
     if ($this->cacheengine=='local') {
         $this->groups=array();
+        $this->users=array();
     } elseif ($this->cacheengine=='mysql') {
         $sql="TRUNCATE Tables";
         $this->logger(3, "truncate sql");
         if (! $mysqlres = $this->mysqli->query("TRUNCATE groups")) {
-            $this->logger(1, "error clearing mysql cache system");
+            $this->logger(1, "error clearing mysql cache system (groups)");
+            exit;
+        }
+        if (! $mysqlres = $this->mysqli->query("TRUNCATE users")) {
+            $this->logger(1, "error clearing mysql cache system (users)");
             exit;
         }
     }
@@ -99,19 +105,21 @@ class Zammad
    *--------------------------*/
     $this->logger(9, "suche ".$id);
         $found=false;
-        $return="";
+        $return=array();
         if ($this->cacheengine=='local') {
             $this->logger(3, "suche in local cahe");
         // array-keyexists ?
         if (array_key_exists($id, $this->groups)) {
             $this->logger(10, "found in local cahe");
-            $return=$this->groups[$id];
+            $return=array($this->groups[$id]['name'],
+            $this->groups[$id]['note'],
+            $this->groups[$id]['user_ids']);
             $found=true;
         }
         } elseif ($this->cacheengine=='mysql') {
             //selectsql
         $this->logger(10, "suche in mysql cahe");
-            $sql="SELECT `id`, `name` FROM `groups` WHERE `id` = \"$id\"";
+            $sql="SELECT `id`, `name`, `note`, `user_ids` FROM `groups` WHERE `id` = \"$id\"";
             if (! $mysqlres = $this->mysqli->query($sql)) {
                 $this->logger(1, "SQL Error $sql");
                 exit;
@@ -119,7 +127,7 @@ class Zammad
             if ($mysqlres->num_rows==1) {
                 $this->logger(10, "found in mysql cache");
                 $row=mysqli_fetch_assoc($mysqlres);
-                $return=$row['name'];
+                $return=array($row['name'], $row['note'],$row['user_ids']);
                 $found=true;
             }
         }
@@ -129,23 +137,91 @@ class Zammad
             $url=$this->config['url']."/groups/".$id;
             $json_return=$this->CallRESTAPi('GET', $url, false, $this->config['auth']);
             $json_array=json_decode($json_return, true);
+            $userids=implode(",",$json_array['user_ids']);
         // cache abspeichern
         if ($this->cacheengine=='local') {
             $this->logger(10, "store in local cache");
-            $this->groups[$id]=$json_array['name'];
+            $this->groups[$id]['name']=$json_array['name'];
+            $this->groups[$id]['note']=$json_array['note'];
+            $this->groups[$id]['user_ids']=$userids;
         } elseif ($this->cacheengine=='mysql') {
             $this->logger(10, "store in mysql cache");
-            $sql="INSERT INTO `groups` (`id`, `name`) VALUES (\"$id\", \"".$json_array['name']."\")";
+            $sql="INSERT INTO `groups` (`id`, `name`, `note`, `user_ids`) VALUES (\"$id\", \"".$json_array['name']."\", \"".$json_array['note']."\", \"".$userids."\")";
             if (! $mysqlres = $this->mysqli->query($sql)) {
                 $this->logger(1, "SQL Error $sql");
                 exit;
             }
         }
         //rückgabewert
-        $return=$json_array['name'];
+        $return=array($json_array['name'],$json_array['note'],$userids);
         }
         return $return;
     }
+
+
+
+
+
+    public function get_username($id)
+    {
+        /*--------------------------
+    * get username (ask cache, or query zammad and store in cache)
+    *--------------------------*/
+    $this->logger(9, "suche uid".$id);
+        $found=false;
+        $return=array();
+        if ($this->cacheengine=='local') {
+            $this->logger(3, "suche in local cahe");
+        // array-keyexists ?
+        if (array_key_exists($id, $this->users)) {
+            $this->logger(10, "found in local cahe");
+            $return=array($this->users[$id]['login'],
+            $this->users[$id]['firstname'],
+            $this->users[$id]['lastname']);
+            $found=true;
+        }
+        } elseif ($this->cacheengine=='mysql') {
+            //selectsql
+        $this->logger(10, "suche in mysql cahe");
+            $sql="SELECT `id`, `login`, `firstname`, `lastname` FROM `users` WHERE `id` = \"$id\"";
+            if (! $mysqlres = $this->mysqli->query($sql)) {
+                $this->logger(1, "SQL Error $sql");
+                exit;
+            }
+            if ($mysqlres->num_rows==1) {
+                $this->logger(10, "found in mysql cache");
+                $row=mysqli_fetch_assoc($mysqlres);
+                $return=array($row['login'], $row['firstname'],$row['lastname']);
+                $found=true;
+            }
+        }
+
+        if (!$found) {
+            $this->logger(10, "not found in cache");
+            $url=$this->config['url']."/users/".$id;
+            $json_return=$this->CallRESTAPi('GET', $url, false, $this->config['auth']);
+            $json_array=json_decode($json_return, true);
+        // cache abspeichern
+        if ($this->cacheengine=='local') {
+            $this->logger(10, "store in local cache");
+            $this->groups[$id]['login']=$json_array['login'];
+            $this->groups[$id]['firstname']=$json_array['firstname'];
+            $this->groups[$id]['lastname']=$json_array['lastname'];
+        } elseif ($this->cacheengine=='mysql') {
+            $this->logger(10, "store in mysql cache");
+            $sql="INSERT INTO `users` (`id`, `login`, `firstname`, `lastname`) VALUES (\"$id\", \"".$json_array['login']."\", \"".$json_array['firstname']."\", \"".$json_array['lastname']."\")";
+            if (! $mysqlres = $this->mysqli->query($sql)) {
+                $this->logger(1, "SQL Error $sql");
+                exit;
+            }
+        }
+        //rückgabewert
+        $return=array($json_array['login'],$json_array['firstname'],$json_array['lastname']);
+        }
+        return $return;
+    }
+
+
 
 
 

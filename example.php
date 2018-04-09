@@ -48,4 +48,8 @@ while ($row=mysqli_fetch_assoc($mysqlres)) {
 
 //--------------------------
 // fetching Groupname id:12
-echo $zammad->get_groupname(12);
+print_r ($zammad->get_groupname(12));
+
+//--------------------------
+// fetching Username  id:26
+print_r ($zammad->get_username(26));

@@ -13,6 +13,7 @@ php class to interact with zammad rest api
 * add customer if customer with email not found in zammad userlist
 * fetching ticket infos
 * fetching (and cache) group name
+* fetching (and cache) user name
 
 ## Requirements
 php curl
