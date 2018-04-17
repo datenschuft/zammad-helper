@@ -1,11 +1,22 @@
 <?php
 
+
+// Zammad - System
+$zammad_api_client_config = [
+    'url' => 'https://zammad.example.com',
+
+    // with username and password
+    //'username' => 'zammad-admin@ks-service.at',
+    //'password' => 'Wse98R2+',
+    'username' => 'zammad-admin@yourdomain',
+    'password' => 'securepassword',
+    // or with HTTP token:
+    //'http_token' => '...',
+    // or with OAuth2 token:
+    //'oauth2_token' => '...',
+];
 //config
 $c=array();
-// Zammad - System
-$c['zurl']="https://zammad.example.com/api/v1";
-$c['zuser']="zammad-admin@yourdomain";
-$c['zpasswd']="securepassword";
 //loglevel
 $c['loglevel']=10;
 //caching
@@ -16,40 +27,22 @@ $c['cache']['mysql']['user']="cacheuser";
 $c['cache']['mysql']['passwd']="cachepwd";
 $c['cache']['mysql']['db']="zammad_helper";
 
+
+
+require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '/config.php';
+use ZammadAPIClient\Client;
+use ZammadAPIClient\ResourceType;
 include('includes.php');
+$zclient = new Zammadcache($zammad_api_client_config);
 
-
-$zammad= new Zammad();
+// loading configuration (caching, loglevel...)
 $zammad->load_config($c);
-$auth=array($c['zuser'],$c['zpasswd']);
 
-//--------------------------
+
 // Clear Zammad-Helper caching - System
 $zammad->clearcache();
 
 
-
-//--------------------------
-// fetching users from sql to add them to zammad, if not found
-$mysqli=connectsql($c['sql'][1]);
-
-if (! $mysqlres = $mysqli->query("SELECT * FROM `hr_oe` WHERE `mail` != \"\"")) {
-        exit;
-}
-while ($row=mysqli_fetch_assoc($mysqlres)) {
-
-	$user=array();
-	$user["firstname"]=strval(utf8_encode($row['tel']));
-	$user["lastname"]=strval(utf8_encode($row['text']));
-	$user["email"]=strval(utf8_encode($row['mail']));
-	$zammad->add_user($user);
-
-}
-
-//--------------------------
-// fetching Groupname id:12
-print_r ($zammad->get_groupname(12));
-
-//--------------------------
 // fetching Username  id:26
-print_r ($zammad->get_username(26));
+print_r ($zclient->getuser(26));

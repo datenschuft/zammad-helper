@@ -3,17 +3,25 @@
 
 (c)2018 Wenger Florian<br>
 wenger@unifox.at<br>
-License: GNU GPL 3
+License: GNU AFFERO GENERAL PUBLIC LICENSE Version 3
 
 ## Description
 
-!!! very early version !!!
-php class to interact with zammad rest api
+!!! very early version !!!<br>
+Extending zammad/zammad-api-client-php": "1.0.*
+(https://github.com/zammad/zammad-api-client-php)<br>
+to add caching support
 
-* add customer if customer with email not found in zammad userlist
-* fetching ticket infos
-* fetching (and cache) group name
+
 * fetching (and cache) user name
 
 ## Requirements
-php curl
+composer
+
+composer.json
+```
+{
+    "require": {
+	"zammad/zammad-api-client-php": "1.0.*"
+    }
+}```
