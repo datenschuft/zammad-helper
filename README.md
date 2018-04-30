@@ -25,3 +25,6 @@ composer.json
 	"zammad/zammad-api-client-php": "1.0.*"
     }
 }```
+
+run<br/>
+composer update
